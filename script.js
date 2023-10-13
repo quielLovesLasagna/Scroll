@@ -1,70 +1,86 @@
 "use strict";
 
+// Element.getBoundingClientRect() method returns the size of an element and its position relative to the viewport.
+// pageYOffset is a read - only window property that returns the number of pixels the document has been scrolled vertically.
+// slice extracts a section of a string without modifying original string
+//offsetTop - A Number, representing the top position of the element, in pixels
+
+// ********** set date ************
+// select span
 const date = document.getElementById("date");
 date.innerHTML = new Date().getFullYear();
 
-const navbar = document.getElementById("nav");
+// ********** close links ************
 const navToggle = document.querySelector(".nav-toggle");
 const linksContainer = document.querySelector(".links-container");
 const links = document.querySelector(".links");
-const scrollLinks = document.querySelectorAll(".scroll-link");
-const topLink = document.querySelector(".top-link");
 
-const navbarHeight = navbar.getBoundingClientRect().height;
-const containerHeight = linksContainer.getBoundingClientRect().height;
-const linksHeight = links.getBoundingClientRect().height;
+navToggle.addEventListener("click", function () {
+  // linksContainer.classList.toggle("show-links");
 
-// Functions:
-
-// Scroll to specific section/element
-const scrollTo = (element) => {
-  let position = element.offsetTop - navbarHeight;
-  if (!navbar.classList.contains("fixed-nav")) {
-    position -= navbarHeight;
-  }
-  if (navbarHeight > 82) {
-    position += containerHeight;
-  }
-  window.scrollTo({
-    left: 0,
-    top: position,
-  });
-  linksContainer.style.height = 0;
-};
-
-// Toggle button
-const toggleLinksBtn = () => {
+  const linksHeight = links.getBoundingClientRect().height;
+  const containerHeight = linksContainer.getBoundingClientRect().height;
   if (containerHeight === 0) {
     linksContainer.style.height = `${linksHeight}px`;
   } else {
     linksContainer.style.height = 0;
   }
-};
-
-// Handles user scroll
-const handleScroll = () => {
-  const scrollHeight = window.pageYOffset;
-  navbar.classList.toggle("fixed-nav", scrollHeight > navbarHeight);
-  topLink.classList.toggle("show-link", scrollHeight > 500);
-};
-
-// When user click/s link/s handler
-const handleScrollToClick = (e) => {
-  e.preventDefault();
-  const id = e.currentTarget.getAttribute("href").slice(1);
-  const element = document.getElementById(id);
-  scrollTo(element);
-};
-
-// Event handlers:
-
-// Event handler for the navigation toggle button
-navToggle.addEventListener("click", toggleLinksBtn);
-
-// Event handler for scroll event
-window.addEventListener("scroll", handleScroll);
-
-// Event handler for scroll links (links) when clicked
-scrollLinks.forEach((link) => {
-  link.addEventListener("click", handleScrollToClick);
+  // console.log(linksContainer.getBoundingClientRect());
 });
+
+// ********** fixed navbar ************
+
+const navbar = document.getElementById("nav");
+const topLink = document.querySelector(".top-link");
+
+window.addEventListener("scroll", function () {
+  const scrollHeight = window.pageYOffset;
+  const navHeight = navbar.getBoundingClientRect().height;
+  if (scrollHeight > navHeight) {
+    navbar.classList.add("fixed-nav");
+  } else {
+    navbar.classList.remove("fixed-nav");
+  }
+  // setup back to top link
+
+  if (scrollHeight > 500) {
+    console.log("helo");
+
+    topLink.classList.add("show-link");
+  } else {
+    topLink.classList.remove("show-link");
+  }
+});
+
+// ********** smooth scroll ************
+// select links
+const scrollLinks = document.querySelectorAll(".scroll-link");
+scrollLinks.forEach((link) => {
+  link.addEventListener("click", (e) => {
+    // prevent default
+    e.preventDefault();
+    // navigate to specific spot
+    const id = e.currentTarget.getAttribute("href").slice(1);
+    const element = document.getElementById(id);
+
+    const navHeight = navbar.getBoundingClientRect().height;
+    const containerHeight = linksContainer.getBoundingClientRect().height;
+    const fixedNav = navbar.classList.contains("fixed-nav");
+    let position = element.offsetTop - navHeight;
+
+    if (!fixedNav) {
+      position = position - navHeight;
+    }
+    if (navHeight > 82) {
+      position = position + containerHeight;
+    }
+
+    window.scrollTo({
+      left: 0,
+      top: position,
+    });
+    // close
+    linksContainer.style.height = 0;
+  });
+});
+// calculate heights
